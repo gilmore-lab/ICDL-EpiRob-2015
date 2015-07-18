@@ -1,0 +1,289 @@
+---
+title: "ICDL-EpiRob-15"
+author: "Rick O. Gilmore"
+date: "`r Sys.Date()`"
+output: ioslides_presentation
+---
+
+## What Accounts for Developmental Shifts in Optic Flow Sensitivity?
+
+Rick O. Gilmore, Penn State
+
+Florian Raudies, HP Labs
+
+Swapnaa Jayaraman, Indiana University
+
+<https://nyu.databrary.org/volume/81>, <https://github.com/gilmore-lab/>
+
+## Background
+
+- What is Optic Flow?
+- How Does Optic Flow Sensitivity Develop?
+
+## What is Optic Flow?
+
+## How Does Optic Flow Sensitivity Develop?
+
+## This Study Asks
+
+- What are the statistics of infants' optic flow experiences?
+- Do the statistics help explain development in sensitivity?
+
+## The Data
+
+- First-person videos from head-mounted cameras
+- 41 days to 13.2 mos
+- Tamil Nadu, India & Bloomington, Indiana
+- Examples
+    - 54 weeks, India
+    - <https://nyu.databrary.org/volume/81/slot/7699/-?asset=16413>
+    - X weeks, Indiana
+- Data, and (most) code stored & shared
+  - <https://nyu.databrary.org/volume/81>
+  - <https://github.com/gilmore-lab/>
+
+## Questions
+
+## Theoretical Framework
+
+- What changes in *development* or *culture* might influence optic flow?
+- Posture: Walking vs. Crawling
+- Geometry: Typical distance to surfaces, objects
+
+$Optic Flow Equations$
+
+## Simulating Effects of Posture, Geometry
+
+![Gilmore-Raudies-Jayaraman-Fig-1](figs/fig-1.pdf)
+
+## Statistics
+
+```{r configuration, echo=FALSE, warning=FALSE, message=FALSE, include=FALSE}
+library(ggplot2)
+library(dplyr)
+library(nlme)
+library(knitr)
+```
+
+```{r simulation-histogram, echo=FALSE, warning=FALSE, message=FALSE, include=FALSE}
+# Load simulation histogram data
+dir.data = "../data/simulation-data"
+fn.data = paste(dir.data, "HistogramFromTheory.csv", sep="/")
+df.in <- read.csv( fn.data, header=FALSE )
+
+geom.names <- unlist( df.in[,1] )
+locomotion.names <- unlist( df.in[,2] )
+vals <- t( df.in[,3:23] )
+
+bins <- seq(0,45, length.out=21)
+
+df.th <- data.frame( Bin.Ctr = bins,
+                         Geometry = rep( geom.names, each=21 ),
+                         Locomotion = rep( locomotion.names, each=21 ),
+                         Bin.Ct = as.vector( unlist( vals ) ) 
+                         )
+df.th.crawl <- df.th %>%
+  filter( Locomotion == "crawling" ) %>%
+  group_by( Geometry, Bin.Ctr ) %>%
+  summarize( crawling.ct = sum( Bin.Ct) )
+
+df.th.walk <- df.th %>%
+  filter( Locomotion == "walking") %>%
+  group_by( Geometry, Bin.Ctr ) %>%
+  summarize( walking.ct = sum( Bin.Ct ))
+
+df.th.loco <- merge( df.th.crawl, df.th.walk, 
+                     by.x=c("Geometry", "Bin.Ctr"), 
+                     by.y=c("Geometry", "Bin.Ctr")
+) %>% mutate( tot.ct = crawling.ct + walking.ct ) %>%
+  group_by( Geometry ) %>%
+  mutate( tot.geom.ct = sum( tot.ct ) )
+
+p.thresh = .05
+df.th.loco.stats <- df.th.loco %>%
+  filter(tot.ct >= 5) %>%
+  mutate( num = (walking.ct/tot.geom.ct - crawling.ct/tot.geom.ct)^2,
+          denom = walking.ct/(tot.geom.ct^2) + crawling.ct/(tot.geom.ct)^2,
+          chisq = num/denom ) %>%
+  group_by(Geometry) %>%
+  summarize( chisq.loco = sum( chisq ) ) %>%
+  mutate( p.chisq = 1-pchisq( chisq.loco, 21) ) %>%
+  filter( p.chisq < p.thresh )
+df.th.loco.stats %>%
+  kable()
+```
+
+### Plot Speed Effects By Posture
+
+```{r, simulation-histogram-plot, echo=FALSE, warning=FALSE, message=FALSE, include=FALSE}
+p <- ggplot( data=df.th, aes(x=Bin.Ctr, y=Bin.Ct, fill=Locomotion)) +
+  geom_bar(position="dodge", stat="identity") +
+  facet_grid(. ~ Geometry)+
+  xlab("Speed (deg/s)") +
+  ylab("Number of observations") +
+  theme( strip.text=element_text(size=14), 
+         axis.title=element_text(size=14),
+         legend.position="bottom")
+p
+```
+
+## Cultural Differences in Segment Durations
+
+```{r segment-durations, echo=FALSE, warning=FALSE, message=FALSE}
+
+# read data file
+fn.seg.duration <- '../data/coded-segments.csv'
+df.segments <- read.csv(fn.seg.duration)
+
+# Restrict consideration to segments < 3 min
+df.segments.3m <- df.segments %>% 
+  mutate(Minutes=Segment.ms/(1000*60)) %>%
+  filter(Motion.Static != 'Unclassified') %>%
+  filter(Minutes <= 3)
+
+# Adjust country order
+countries <- relevel(df.segments.3m$Country, "U.S.")
+df.segments.3m$Country <- countries
+
+# Calculate summary stats to annotate plot
+df.summary <- df.segments.3m %>%
+  group_by(Country, Motion.Static) %>%
+  summarize(Minutes.med = median(Minutes),
+            Minutes.mean = mean(Minutes))
+
+df.summary$Minutes = c(1,1,1,1)
+
+# Convert minutes to seconds for readability
+df.summary$Label.med = paste0("median = ", round(df.summary$Minutes.med*60, 1), " s")
+df.summary$Label.mean = paste0("mean = ", round(df.summary$Minutes.mean*60, 1), " s")
+
+# Plot
+p <- ggplot(df.segments.3m, aes(x=Minutes)) +
+  facet_grid(Motion.Static ~ Country) + 
+  geom_histogram() +
+  ylab('Number of Segments') +
+  xlab('Segment Duration (min)') +
+  theme_bw()
+
+p + 
+  geom_text(data=df.summary, aes(x=rep(1.5,4), y=rep(400,4), label=Label.med), size=7) +
+  geom_text(data=df.summary, aes(x=rep(1.5,4), y=rep(300,4), label=Label.mean), size=7) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
+  theme(strip.text = element_text(size=20), 
+        axis.title = element_text(size=20),
+        axis.text = element_text(size=20))
+```
+
+## Individual Differences in Segment Durations
+
+```{r segment-durations-individual-diffs, echo=FALSE, warning=FALSE, message=FALSE}
+p <- ggplot(data=df.segments.3m, aes(x=Minutes, color=Participant.ID)) +
+  facet_grid(Motion.Static ~ Country) +
+  geom_density() +
+  ylab('Density') +
+  xlab('Segment Duration (min)') +
+  guides(color=FALSE) +
+  theme(panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        strip.text = element_text(size=20), 
+        axis.title = element_text(size=20),
+        axis.text = element_text(size=20)
+  )
+p
+```
+
+## Statistical Analysis
+
+```{r statistics-segment-duration, echo=FALSE, warning=FALSE, message=FALSE}
+
+# Restrict analysis to Moving and Stationary conditions
+keep <- c("Moving", "Stationary", echo=FALSE, warning=FALSE, message=FALSE)
+df.motion.static <- subset(df.segments, Motion.Static %in% keep)
+df.motion.static$Motion.Static <- factor(df.motion.static$Motion.Static)
+
+# Restrict to segments < 1.5 min to reduce effects of outliers
+df.trim.1.5min <- df.motion.static %>%
+  filter(Segment.ms <= 1.5*60*1000) # Trim ms < 90,000 ms or 1.5 min
+lme.trim.1.5min <- lme(data=df.trim.1.5min, fixed=Segment.ms ~ Motion.Static*Country*AgeMatchGroup, random = ~ 1 | Participant.ID)
+anova(lme.trim.1.5min) %>% 
+  kable()
+```
+
+## Summary of Effects
+
+```{r anova-segment-duration-plot, echo=FALSE, warning=FALSE, message=FALSE}
+# Create summary data frame
+df.trim.1.5min.summ <- df.trim.1.5min %>%
+  group_by(AgeMatchGroup, Country, Participant.ID, Motion.Static) %>%
+  summarize(Segment.ms.med = median(Segment.ms),
+             Segment.ms.sem  = sd(Segment.ms)/sqrt(n()),
+             Segment.ms.mean = mean(Segment.ms)) %>%
+  mutate(Segment.sec.mean=Segment.ms.mean/1000, Segment.sec.sem=Segment.ms.sem/1000)
+
+c <- relevel( df.trim.1.5min.summ$Country, "U.S.") # make U.S. first for consistency
+df.trim.1.5min.summ$Country <- c
+
+# Plot
+ylims <- aes(ymax=Segment.sec.mean+Segment.sec.sem, ymin=Segment.sec.mean-Segment.sec.sem)
+p7 <- ggplot( data=df.trim.1.5min.summ, aes(x=AgeMatchGroup, y=Segment.sec.mean, color=Motion.Static)) +
+  facet_grid(. ~ Country) +
+  geom_point() +
+  geom_pointrange(ylims) +
+  geom_smooth( method=lm ) +
+  scale_color_discrete( name="Motion Status") +
+  theme( legend.position="bottom") +
+  xlab("Age Group (wks)") +
+  ylab("Segment Duration (s)") +
+  theme(strip.text=element_text(size=14), axis.title=element_text(size=14))
+p7
+```
+
+## Normalized Durations as p(total-time)
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+# Start with untrimmed.
+# Fix leveling order...again
+c <- relevel( df.motion.static$Country, "U.S.") # make U.S. first for consistency
+df.motion.static$Country <- c
+
+# Sum total duration by participant and motion condition
+df.motion.static.summ.by.motion <- df.motion.static %>%
+  group_by(Country, AgeMatchGroup, Participant.ID, Motion.Static) %>%
+  summarize(Segment.ms.tot = sum(Segment.ms))
+
+df.motion.static.summ.grand <- df.motion.static.summ.by.motion %>%
+  group_by(Country, AgeMatchGroup, Participant.ID) %>%
+  summarize(Segment.ms.tot.grand = sum(Segment.ms.tot))
+
+df.motion.static.summ <- merge( df.motion.static.summ.grand, df.motion.static.summ.by.motion)
+
+df.motion.static.summ <- df.motion.static.summ %>%
+  group_by( Country, AgeMatchGroup, Participant.ID, Motion.Static) %>%
+  summarize(Segment.ms.p = Segment.ms.tot/Segment.ms.tot.grand)
+
+# Now plot
+p8 <- ggplot(data=df.motion.static.summ, aes(x=AgeMatchGroup, y=Segment.ms.p, color= Motion.Static)) +
+  facet_grid( . ~ Country ) +
+  geom_point() + 
+  geom_smooth( method=lm ) +
+  xlab("Age Group (wks)") +
+  ylab("Proportion of Time") +
+  theme(strip.text = element_text(size=20), 
+        axis.title = element_text(size=20),
+        axis.text = element_text(size=20),
+        legend.text = element_text(size=18),
+        legend.title = element_text(size=18)) +
+  theme(legend.position="bottom") + 
+  scale_color_discrete(name="Motion Status")
+p8
+```
+
+## Statistics for p(total-time)
+
+```{r p-total-segment-duration-stats, echo=FALSE, warning=FALSE, message=FALSE}
+# Since Motion.Static proportions are not independent
+lme.p.segment <- lme(fixed = Segment.ms.p ~ Country*AgeMatchGroup, data = df.motion.static.summ[df.motion.static.summ$Motion.Static=='Stationary',], random = ~ 1 | Participant.ID)
+anova(lme.p.segment) %>% 
+  kable()
+```
+
