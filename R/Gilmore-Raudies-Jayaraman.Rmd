@@ -15,6 +15,8 @@ Swapnaa Jayaraman, Indiana University
 
 <https://nyu.databrary.org/volume/81>, <https://github.com/gilmore-lab/>
 
+*Support*: NSF BCS-1147440, NSF BCS-1238599, NICHD U01-HD-076595
+
 ## Background
 
 - What is Optic Flow?
@@ -270,7 +272,6 @@ p7
 ## Normalized Durations as p(total-time)
 
 ```{r, echo=FALSE, warning=FALSE, message=FALSE}
-
 # Start with untrimmed.
 # Fix leveling order...again
 c <- relevel( df.motion.static$Country, "U.S.") # make U.S. first for consistency
@@ -317,11 +318,11 @@ anova(lme.p.segment) %>%
   kable()
 ```
 
-## Empirical Speed Distributions
+## Natural Scene Statistics for Optic Flow
 
 - Selected 5 x 5 s segments/participant, both moving and stationary
-- Estimate frame by frame flow fields
-- Details in Raudies & Gilmore 2014
+- Estimated frame by frame flow fields
+- Details in Raudies & Gilmore 2014.
 
 ## Speed Distributions
 
@@ -352,9 +353,9 @@ p <- df_speed_hist %>%
 p
 ```
 
-## Illustrative Empirical Speed Distributions
+## Comparing Shape of (Trimmed) Speed Distributions
 
-- Fit $\gamma$ distribution to speed histograms
+- Fit $\gamma$ distribution to trimmed speed histograms
 
 - $f(x;k,\theta) =  \alpha\frac{x^{k-1}e^{-\frac{x}{\theta}}}{\theta^k\Gamma(k)}$
 
@@ -439,6 +440,8 @@ anova(lme.k.country) %>%
 ## Stack
 
 - Databrary, <https://nyu.databrary.org/volume/81>
+    - Access to identifiable data (e.g. videos) restricted
+    - Access agreement + institutional authorization
 - Datayvu, <http://datavyu.org>
 - Matlab
 - RStudio, <https://www.rstudio.com/>
