@@ -63,15 +63,24 @@ $Optic Flow Equations$
 ## Crawl vs. Walk Speeds By Geometry
 
 ```{r configuration, echo=FALSE, warning=FALSE, message=FALSE, include=FALSE}
+# Source libraries
 library(ggplot2)
 library(dplyr)
 library(nlme)
 library(knitr)
+library(tidyr)
 
+# Directories
 dir.data <- '../data'
 dir.figs <- '../figs'
 
-df.in <- read.csv( paste(dir.data,'simulation-speed-hist.csv', sep="/"), header=FALSE )
+# File names
+fn_sim_spd_hist <- 'simulation-speed-hist.csv'
+fn.seg.duration <- 'coded-segments.csv'
+fn_spd_hist_bins <- 'speed-histogram-bins.csv'
+fn_spd_hist_fits <- 'speed-histogram-fits.csv'
+
+df.in <- read.csv( paste(dir.data, fn_sim_spd_hist, sep="/"), header=FALSE )
 
 geom.names <- unlist( df.in[,1] )
 locomotion.names <- unlist( df.in[,2] )
@@ -117,7 +126,6 @@ df.th.loco.stats <- df.th.loco %>%
 ```
 
 ```{r simulation-histogram-plot, echo=FALSE, warning=FALSE, message=FALSE}
-
 # Plot
 p <- ggplot( data=df.th, aes(x=Bin.Ctr, y=Bin.Ct, fill=Locomotion)) +
   geom_bar(position="dodge", stat="identity") +
@@ -133,7 +141,6 @@ p
 ## Statistics Comparing Crawling vs. Walking Speeds by Geometry
 
 ```{r simulation-histogram-stats, echo=FALSE, warning=FALSE, message=FALSE}
-
 p.thresh = .05
 df.th.loco.stats <- df.th.loco %>%
   filter(tot.ct >= 5) %>%
@@ -151,10 +158,9 @@ df.th.loco.stats %>%
 ## Cultural Differences in Segment Durations
 
 ```{r segment-durations, echo=FALSE, warning=FALSE, message=FALSE}
-
 # read data file
 fn.seg.duration <- '../data/coded-segments.csv'
-df.segments <- read.csv(fn.seg.duration)
+df.segments <- read.csv(paste(dir.data, fn.seg.duration, sep="/"))
 
 # Restrict consideration to segments < 3 min
 df.segments.3m <- df.segments %>% 
@@ -198,6 +204,7 @@ p +
 ## Individual Differences in Segment Durations
 
 ```{r segment-durations-individual-diffs, echo=FALSE, warning=FALSE, message=FALSE}
+
 p <- ggplot(data=df.segments.3m, aes(x=Minutes, color=Participant.ID)) +
   facet_grid(Motion.Static ~ Country) +
   geom_density() +
@@ -233,6 +240,7 @@ anova(lme.trim.1.5min) %>%
 ## Summary of Segment Duration Effects
 
 ```{r anova-segment-duration-plot, echo=FALSE, warning=FALSE, message=FALSE}
+
 # Create summary data frame
 df.trim.1.5min.summ <- df.trim.1.5min %>%
   group_by(AgeMatchGroup, Country, Participant.ID, Motion.Static) %>%
@@ -262,6 +270,7 @@ p7
 ## Normalized Durations as p(total-time)
 
 ```{r, echo=FALSE, warning=FALSE, message=FALSE}
+
 # Start with untrimmed.
 # Fix leveling order...again
 c <- relevel( df.motion.static$Country, "U.S.") # make U.S. first for consistency
@@ -283,7 +292,7 @@ df.motion.static.summ <- df.motion.static.summ %>%
   summarize(Segment.ms.p = Segment.ms.tot/Segment.ms.tot.grand)
 
 # Now plot
-p8 <- ggplot(data=df.motion.static.summ, aes(x=AgeMatchGroup, y=Segment.ms.p, color= Motion.Static)) +
+p <- ggplot(data=df.motion.static.summ, aes(x=AgeMatchGroup, y=Segment.ms.p, color= Motion.Static)) +
   facet_grid( . ~ Country ) +
   geom_point() + 
   geom_smooth( method=lm ) +
@@ -296,7 +305,7 @@ p8 <- ggplot(data=df.motion.static.summ, aes(x=AgeMatchGroup, y=Segment.ms.p, co
         legend.title = element_text(size=18)) +
   theme(legend.position="bottom") + 
   scale_color_discrete(name="Motion Status")
-p8
+p
 ```
 
 ## Statistics for Segment Durations as p(total-time)
@@ -311,12 +320,100 @@ anova(lme.p.segment) %>%
 ## Empirical Speed Distributions
 
 - Selected 5 x 5 s segments/participant, both moving and stationary
-- Fit $\gamma$ functions to speed distributions
-  - $a$, amplitude; $k$, shape; and $\theta$, scale parameters. 
+- Estimate frame by frame flow fields
+- Details in Raudies & Gilmore 2014
+
+## Speed Distributions
+
+```{r speed-distributions-US, echo=FALSE, warning=FALSE, message=FALSE}
+# Load data
+df_speed_hist <- read.csv(paste(dir.data, fn_spd_hist_bins, sep="/"))
+
+# U.S Histogram
+p <- df_speed_hist %>% 
+  filter(Country == "U.S.") %>%
+  ggplot(aes(x=Speed, y=N_obs)) +
+  facet_grid(Participant.ID ~ Motion_status) +
+  geom_bar(stat="identity") +
+  ggtitle("U.S")
+p
+```
+
+## Speed Distributions
+
+```{r speed-distributions-India, echo=FALSE, warning=FALSE, message=FALSE}
+# India Histogram
+p <- df_speed_hist %>% 
+  filter(Country == "India") %>%
+  ggplot(aes(x=Speed, y=N_obs)) +
+  facet_grid(Participant.ID ~ Motion_status) +
+  geom_bar(stat="identity") +
+  ggtitle("India")
+p
+```
 
 ## Illustrative Empirical Speed Distributions
 
+- Fit $\gamma$ distribution to speed histograms
+
+- $f(x;k,\theta) =  \alpha\frac{x^{k-1}e^{-\frac{x}{\theta}}}{\theta^k\Gamma(k)}$
+
+- $\alpha$, amplitude; $\kappa$, shape; and $\theta$, scale parameters.
+
+##
+
 <img src='../figs/speed-histograms-trimmed.jpg' width=800px/>
+
+## Analysis of Fitted Parameters
+
+```{r speed-fitted-parameters, echo=FALSE, warning=FALSE, message=FALSE}
+# Load data
+df.merged <- read.csv(paste(dir.data, fn_spd_hist_fits, sep="/"))
+
+# Re-label to fix country order
+countries <- relevel(df.merged$Country, "U.S.")
+df.merged$Country <- countries
+
+# Fix Motion.Static level labels
+levels(df.merged$Motion.Static) <- c("Moving", "Stationary")
+
+# Plot $\kappa$ parameter
+p.k <- df.merged %>%
+  gather(Parameter.name, Fitted.value, alpha, kappa, theta ) %>%
+  filter(Parameter.name=='kappa') %>%
+  ggplot(aes(x=Motion.Static, y=Fitted.value, color=Motion.Static)) +
+  facet_grid(. ~ Country) +
+  geom_boxplot() +
+  geom_point() +
+  ggtitle(expression(paste("Distribution of ", kappa, " parameter"))) + 
+  xlab("") + 
+  ylab("Parameter Estimate")
+p.k
+```
+
+## Change in $\kappa$ Across Age
+
+```{r kappa-by-age, echo=FALSE, warning=FALSE, message=FALSE}
+p.k <- df.merged %>%
+  gather(Parameter.name, Fitted.value, alpha, kappa, theta ) %>%
+  filter(Parameter.name=='kappa') %>%
+  ggplot(aes(x=Age_group_match, y=Fitted.value, color=Motion.Static)) +
+  facet_grid(. ~ Country) +
+  geom_point() +
+  geom_smooth(method=lm) +
+  ggtitle(expression(paste("Distribution of ", kappa, " parameter"))) +
+  xlab("Age Group (mos)") +
+  ylab("Parameter Estimate")
+p.k
+```
+
+## Statistics
+
+```{r spd-fitted-parameters-manova, echo=FALSE, warning=FALSE, message=FALSE}
+lme.k.country <- lme(fixed = kappa ~ Motion.Static*Age_group_match + Country, random = ~ 1 | Participant.ID, data=df.merged)
+anova(lme.k.country) %>%
+  kable()
+```
 
 ## Empirical Pattern Distributions
 
@@ -333,8 +430,17 @@ anova(lme.p.segment) %>%
 
 - Posture influences optic flow speeds & patterns
     - Crawling: faster speeds, more translational flow
-- Geometry matters little
+    - Geometry matters little
 - Empirical optic flow data show
     - Fast speeds, frequent translational flow
-    - Culture/
+    - Influence of motion status
+    - Culture/geometry play small role
 
+## Stack
+
+- Databrary, <https://nyu.databrary.org/volume/81>
+- Datayvu, <http://datavyu.org>
+- Matlab
+- RStudio, <https://www.rstudio.com/>
+    - R Markdown, <http://rmarkdown.rstudio.com/>
+- GitHub, <http://github.com/gilmore-lab/ICDL-EpiRob-2015>
