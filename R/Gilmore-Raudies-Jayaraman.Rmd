@@ -30,13 +30,15 @@ fn_spd_hist_fits <- 'speed-histogram-fits.csv'
 ## What Accounts for Developmental Shifts in Optic Flow Sensitivity?
 
 <div class="centered">
-**Rick O. Gilmore, Penn State**
 
-**Florian Raudies, HP Labs**
+### Rick O. Gilmore, Penn State
 
-**Swapnaa Jayaraman, Indiana University**
+### Florian Raudies, HP Labs
+
+### Swapnaa Jayaraman, Indiana University
 
 <https://nyu.databrary.org/volume/81>
+
 <https://github.com/gilmore-lab/ICDL-EpiRob-2015>
 
 *Support*: NSF BCS-1147440, NSF BCS-1238599, NICHD U01-HD-076595
@@ -65,7 +67,7 @@ fn_spd_hist_fits <- 'speed-histogram-fits.csv'
 ## Natural Scene Statistics of Optic Flow
 
 - [*Raudies & Gilmore ICDL-EpiRob 2012*](http://ieeexplore.ieee.org/xpl/login.jsp?tp=&arnumber=6400584&url=http%3A%2F%2Fieeexplore.ieee.org%2Fxpls%2Fabs_all.jsp%3Farnumber%3D6400584)
-    - Infants experience faster flow than mothers even geometry, speed of locomotion equated.
+    - Infants experience faster flow than mothers even when geometry, speed of locomotion equated.
 - [*Raudies & Gilmore, Neural Computation, 2014*](http://www.mitpressjournals.org/doi/abs/10.1162/NECO_a_00645#.Va6g-hNViko)
     - Motion "prior" for infants faster than for mothers
     - Empirical motion priors not "slow" as predicted by theory
@@ -123,20 +125,22 @@ Kretch, Franchak, & Adolph (2014), <http://dx.doi.org/10.1111/cdev.12206>
 | Side wall                | +/- 2 m  |
 | Side wall height         | 2.5 m    |
 | Distance of ground plane | 32 m     |
+| Field of view width      | 60 deg   |
+| Field of view height     | 45 deg   |
 
-## Simulating Effects of Posture {.flexbox .vcenter}
+## Simulating Flow Fields {.flexbox .vcenter}
 
 <div class="centered">
   <img src='../figs/simulation-flow-patterns.png' width=800px/>
 </div>
 
-## Simulated Flow Direction Distributions by Posture & Geometry {.flexbox .vcenter}
+## Flow Direction Distributions by Geometry & Posture
 
 <div class="centered">
-  <img src='../figs/simulation-flow-direction-hist.png' width=800px/>
+  <img src='../figs/simulation-flow-direction-hist.png' width=600px/>
 </div>
 
-## Crawl vs. Walk Speeds By Geometry {.flexbox .vcenter}
+## Flow Speeds By Geometry and Posture {.flexbox .vcenter}
 
 ```{r crawl-vs-walk-simulated-speeds}
 # Load speed histogram data from simulation
@@ -216,14 +220,12 @@ $\chi^2(20)$: `r df.th.loco.stats[1,1]`: `r df.th.loco.stats[1,2]`, `r df.th.loc
 | Crawling           | 14.41        | 14.42| 14.43     |14.62      |
 | Walking            | 9.38         | 8.56 | 7.39      |9.18       |
 
-
 ## Empirical Measurements of Optic Flow
 
 - First-person videos from head-mounted cameras
-- 41 days to 13.2 mos
-- Tamil Nadu, India & Bloomington, Indiana
-
-<http://databrary.org/volume/81>
+- 20 infants, 41 days to 13.2 mos
+- Chennai, India & Bloomington, Indiana
+- Data: <http://databrary.org/volume/81>
 
 ## Cultural Differences in Segment Durations {.flexbox .vcenter}
 
@@ -273,9 +275,9 @@ p
 ```
 </div>
 
+<!--
 ## Individual Differences in Segment Durations {.flexbox .vcenter}
 
-<div class="centered">
 ```{r segment-durations-individual-diffs, include=TRUE}
 p <- ggplot(data=df.segments.3m, aes(x=Minutes, color=Participant.ID)) +
   facet_grid(Motion.Static ~ Country) +
@@ -291,7 +293,7 @@ p <- ggplot(data=df.segments.3m, aes(x=Minutes, color=Participant.ID)) +
   )
 p
 ```
-</div>
+-->
 
 ## Summary of Segment Duration Effects {.flexbox .vcenter}
 
@@ -397,7 +399,7 @@ Age x Country: $F(`r ul['numDF4']`,`r ul['denDF4']`)=`r ul['F-value4']`, p=`r ul
 
 - Selected 5 x 5 s segments/participant, both moving and stationary
 - Estimated frame by frame flow fields
-- Details in Raudies & Gilmore 2014.
+- Details in [Raudies & Gilmore 2014](http://www.mitpressjournals.org/doi/abs/10.1162/NECO_a_00645#.Va6g-hNViko)
 
 ## Speed Distributions {.flexbox .vcenter}
 
@@ -517,26 +519,27 @@ Country x Age: $F(`r ul['numDF5']`,`r ul['denDF5']`)=`r ul['F-value5']`, p=`r ul
 <img src='../figs/pattern-correlations.jpg' width=800px/>
 </div>
 
-## Conclusions
+## Conclusions: Simulation
 
 - Posture influences optic flow speeds & patterns
     - Crawling: faster speeds, more translational flow
-    - Proximity to ground and pitch of head
+    - Proximity to ground and pitch of head matter
     - Geometry matters relatively little
     
-## Conclusions
+## Conclusions: Empirical Data
 
-- Empirical optic flow data show
-    - Fast speeds, frequent translational flow
-    - Influence of motion status
-    - Individual differences
-    - Broader speed distribution, increase in time spent moving with age in India
-    - Modest effects of culture
-    
+- Time stationary >> time in motion
+- Time stationary declines with age (India)
+- Fast speeds, broad speed distributions
+- Individual differences in moving vs. stationary speed distributions
+- Translational flow >> radial or rotational flow
+
 ## Questions to Ponder
 
-- Do optic flow experiences shape perception?
-- Do experiences shape optic flow-related brain responses?
+- How might optic flow experiences shape perception?
+    - Differences between self vs. other-produced motion?
+    _ Influence of independently moving objects/people?
+- How do optic flow experiences shape brain responses?
 
 ## Stack
 
