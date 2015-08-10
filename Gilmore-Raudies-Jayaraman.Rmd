@@ -216,9 +216,6 @@ p <- ggplot( data=df.th, aes(x=Bin.Ctr, y=Bin.Ct, fill=Locomotion)) +
 p
 ```
 
-```{r simulation-stats}
-```
-
 $\chi^2(20)$: `r df.th.loco.stats[1,1]`: `r df.th.loco.stats[1,2]`, `r df.th.loco.stats[2,1]`: `r df.th.loco.stats[2,2]`, `r df.th.loco.stats[3,1]`: `r df.th.loco.stats[3,2]`, and `r df.th.loco.stats[4,1]`: `r df.th.loco.stats[4,2]`.
 </div>
 
@@ -420,8 +417,8 @@ df_speed_hist$Country <- relevel( df_speed_hist$Country, "U.S.")
 
 # U.S Histogram
 p <- df_speed_hist %>% 
-  ggplot(aes(x=Speed, y=N_obs)) +
-  facet_grid(Motion_status ~ Country) +
+  ggplot(aes(x=Speed, y=N.obs)) +
+  facet_grid(Motion.status ~ Country) +
   geom_bar(stat="identity") +
   ylab('N observations') +
   xlab('Speed (deg/s)') +
@@ -468,22 +465,22 @@ $\alpha$, amplitude; $\kappa$, shape; and $\theta$, scale parameters.
 <div class="centered">
 ```{r speed-fitted-parameters}
 # Load data
-df.merged <- read.csv(paste(dir.data, fn_spd_hist_fits, sep="/"))
+df_spd_fits <- read.csv(paste(dir.data, fn_spd_hist_fits, sep="/"))
 
 # Re-label to fix country order
-countries <- relevel(df.merged$Country, "U.S.")
-df.merged$Country <- countries
+countries <- relevel(df_spd_fits$Country, "U.S.")
+df_spd_fits$Country <- countries
 
 # Fix Motion.Static level labels
-levels(df.merged$Motion.Static) <- c("Moving", "Stationary")
+levels(df_spd_fits$Motion.status) <- c("Moving", "Stationary")
 ```
 
 ```{r kappa-plot, include=TRUE}
 # Plot $\kappa$ parameter
-p.k <- df.merged %>%
-  gather(Parameter.name, Fitted.value, alpha, kappa, theta ) %>%
-  filter(Parameter.name=='kappa') %>%
-  ggplot(aes(x=Motion.Static, y=Fitted.value, color=Motion.Static)) +
+p.k <- df_spd_fits %>%
+  gather(Parameter.name, Fitted.value, a, k, theta ) %>%
+  filter(Parameter.name=='k') %>%
+  ggplot(aes(x=Motion.status, y=Fitted.value, color=Motion.status)) +
   facet_grid(. ~ Country) +
   geom_boxplot() +
   geom_point() +
@@ -497,24 +494,22 @@ p.k
 ```
 
 ```{r kappa-stats}
-lme.k.country <- lme(fixed = kappa ~ Motion.Static*Age_group_match + Country, random = ~ 1 | Participant.ID, data=df.merged)
+lme.k.country <- lme(fixed = k ~ Motion.status*AgeMatchGroup*Country, random = ~ 1 | Participant.ID, data=df_spd_fits)
 ul <- unlist(anova(lme.k.country))
 ```
-Country: $F(`r ul['numDF4']`,`r ul['denDF4']`)=`r ul['F-value4']`, p=`r ul['p-value4']`$
 </div>
 
 ## Change in $\kappa$ Across Age {.flexbox .vcenter}
 
 <div class="centered">
 ```{r kappa-by-age, include=TRUE}
-p.k <- df.merged %>%
-  gather(Parameter.name, Fitted.value, alpha, kappa, theta ) %>%
-  filter(Parameter.name=='kappa') %>%
-  ggplot(aes(x=Age_group_match, y=Fitted.value, color=Motion.Static)) +
+p.k <- df_spd_fits %>%
+  gather(Parameter.name, Fitted.value, a, k, theta ) %>%
+  filter(Parameter.name=='k') %>%
+  ggplot(aes(x=AgeMatchGroup, y=Fitted.value, color=Motion.status)) +
   facet_grid(. ~ Country) +
   geom_point() +
   geom_smooth(method=lm) +
-#  ggtitle(expression(paste("Distribution of ", kappa, " parameter"))) +
   xlab("Age Group (mos)") +
   ylab("Parameter Estimate") +
   theme(strip.text = element_text(size=20), 
@@ -523,11 +518,64 @@ p.k <- df.merged %>%
         legend.position="none")
 p.k
 ```
-
-Country x Age: $F(`r ul['numDF5']`,`r ul['denDF5']`)=`r ul['F-value5']`, p=`r ul['p-value5']`$
 </div>
-## Empirical Pattern Distributions
 
+## $alpha$ parameter
+
+<div class="centered">
+
+```{r alpha-plot, include=TRUE}
+# Plot alpha parameter
+p.a <- df_spd_fits %>%
+  gather(Parameter.name, Fitted.value, a, k, theta ) %>%
+  filter(Parameter.name=='a') %>%
+  ggplot(aes(x=AgeMatchGroup, y=Fitted.value, color=Motion.status)) +
+  facet_grid(. ~ Country) +
+  geom_point() +
+  geom_smooth(method=lm) +
+  xlab("Age Group (mos)") +
+  ylab("Parameter Estimate") +
+  theme(strip.text = element_text(size=20), 
+        axis.title = element_text(size=20),
+        axis.text = element_text(size=20),
+        legend.position="none")
+p.a
+```
+
+```{r alpha-stats}
+lme.a.country <- lme(fixed = a ~ Motion.status*AgeMatchGroup*Country, random = ~ 1 | Participant.ID, data=df_spd_fits)
+ul <- unlist(anova(lme.a.country))
+```
+</div>
+
+## $theta$ parameter
+
+<div class="centered">
+
+```{r theta-plot, include=TRUE}
+p.theta <- df_spd_fits %>%
+  gather(Parameter.name, Fitted.value, a, k, theta ) %>%
+  filter(Parameter.name=='theta') %>%
+  ggplot(aes(x=AgeMatchGroup, y=Fitted.value, color=Motion.status)) +
+  facet_grid(. ~ Country) +
+  geom_point() +
+  geom_smooth(method=lm) +
+  xlab("Age Group (mos)") +
+  ylab("Parameter Estimate") +
+  theme(strip.text = element_text(size=20), 
+        axis.title = element_text(size=20),
+        axis.text = element_text(size=20),
+        legend.position="none")
+p.theta
+```
+
+```{r theta-stats}
+lme.theta.country <- lme(fixed = theta ~ Motion.status*AgeMatchGroup*Country, random = ~ 1 | Participant.ID, data=df_spd_fits)
+ul <- unlist(anova(lme.theta.country))
+```
+</div>
+
+## Empirical Pattern Distributions
 - Correlation with 'canonical' flow patterns
   - radial
   - rotational
