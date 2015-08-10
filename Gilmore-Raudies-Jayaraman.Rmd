@@ -301,7 +301,7 @@ p
 ```
 -->
 
-## Summary of Segment Duration Effects {.flexbox .vcenter}
+## Segment Durations {.flexbox .vcenter}
 
 <div class="centered">
 ```{r anova-segment-duration-plot}
@@ -347,7 +347,7 @@ p
 ```
 </div>
 
-## Normalized Durations as p(total-time) {.flexbox .vcenter}
+## Normalized Durations as $p$(total-time) {.flexbox .vcenter}
 
 <div class="centered">
 ```{r compute-normalized-durations}
@@ -395,8 +395,6 @@ p
 lme.p.segment <- lme(fixed = Segment.ms.p ~ Country*AgeMatchGroup, data = df.motion.static.summ[df.motion.static.summ$Motion.Static=='Stationary',], random = ~ 1 | Participant.ID)
 ul = unlist(anova(lme.p.segment))
 ```
-Age: $F(`r ul['numDF3']`,`r ul['denDF3']`)=`r ul['F-value3']`, p=`r ul['p-value3']`$
-Age x Country: $F(`r ul['numDF4']`,`r ul['denDF4']`)=`r ul['F-value4']`, p=`r ul['p-value4']`$
 
 </div>
 
@@ -442,25 +440,28 @@ $f(x;k,\theta) =  \alpha\frac{x^{k-1}e^{-\frac{x}{\theta}}}{\theta^k\Gamma(k)}$
 $\alpha$, amplitude; $\kappa$, shape; and $\theta$, scale parameters.
 </div>
 
-## Moving ≠ Stationary {.flexbox .vcenter}
+## Illustrative Speed Histograms - 6 weeks {.flexbox .vcenter}
 
-<div class="centered">
-<img src='Gilmore-Raudies-Jayaraman_files/figs/speed-histograms-trimmed-1.png' width=800px/>
+<div class="columns-2" class="centered">
+<img src='Gilmore-Raudies-Jayaraman_files/figs/006AP.png' width=400px/>
+<img src='Gilmore-Raudies-Jayaraman_files/figs/006MO.png' width=400px/>
 </div>
 
-## Moving ~ Stationary{.flexbox .vcenter}
+## Illustrative Speed Histograms -- 34 weeks {.flexbox .vcenter}
 
-<div class="centered">
-<img src='Gilmore-Raudies-Jayaraman_files/figs/speed-histograms-trimmed-2.png' width=800px/>
+<div class="columns-2" class="centered">
+<img src='Gilmore-Raudies-Jayaraman_files/figs/034JC.png' width=400px/>
+<img src='Gilmore-Raudies-Jayaraman_files/figs/034NW.png' width=400px/>
 </div>
 
-## Together {.flexbox .vcenter}
+## Illustrative Speed Histograms -- 58 weeks {.flexbox .vcenter}
 
-<div class="centered">
-<img src='Gilmore-Raudies-Jayaraman_files/figs/speed-histograms-trimmed.jpg' width=800px/>
+<div class="columns-2" class="centered">
+<img src='Gilmore-Raudies-Jayaraman_files/figs/057AP.png' width=400px/>
+<img src='Gilmore-Raudies-Jayaraman_files/figs/058LA.png' width=400px/>
 </div>
 
-## Analysis of Fitted $\kappa$ Parameters {.flexbox .vcenter}
+## Fitted $\kappa$ Parameters {.flexbox .vcenter}
 
 <div class="centered">
 ```{r speed-fitted-parameters}
@@ -492,17 +493,9 @@ p.k <- df_spd_fits %>%
         legend.position="none")
 p.k
 ```
-
-```{r kappa-stats}
-lme.k.country <- lme(fixed = k ~ Motion.status*AgeMatchGroup*Country, random = ~ 1 | Participant.ID, data=df_spd_fits)
-ul <- unlist(anova(lme.k.country))
-```
 </div>
 
-## Change in $\kappa$ Across Age {.flexbox .vcenter}
-
-<div class="centered">
-```{r kappa-by-age, include=TRUE}
+```{r kappa-by-age, include=FALSE}
 p.k <- df_spd_fits %>%
   gather(Parameter.name, Fitted.value, a, k, theta ) %>%
   filter(Parameter.name=='k') %>%
@@ -518,9 +511,14 @@ p.k <- df_spd_fits %>%
         legend.position="none")
 p.k
 ```
-</div>
 
-## $alpha$ parameter
+```{r include=FALSE}
+# Linear mixed effects model
+lme.k <- lme(fixed = k ~ Motion.status*AgeMatchGroup*Country, random = ~ 1 | Participant.ID, data = df_spd_fits)
+anova(lme.k)
+```
+
+## Fitted $\alpha$ Parameters {.flexbox .vcenter}
 
 <div class="centered">
 
@@ -529,11 +527,11 @@ p.k
 p.a <- df_spd_fits %>%
   gather(Parameter.name, Fitted.value, a, k, theta ) %>%
   filter(Parameter.name=='a') %>%
-  ggplot(aes(x=AgeMatchGroup, y=Fitted.value, color=Motion.status)) +
+  ggplot(aes(x=Motion.status, y=Fitted.value, color=Motion.status)) +
   facet_grid(. ~ Country) +
+  geom_boxplot() +
   geom_point() +
-  geom_smooth(method=lm) +
-  xlab("Age Group (mos)") +
+  xlab("") + 
   ylab("Parameter Estimate") +
   theme(strip.text = element_text(size=20), 
         axis.title = element_text(size=20),
@@ -542,25 +540,28 @@ p.a <- df_spd_fits %>%
 p.a
 ```
 
-```{r alpha-stats}
-lme.a.country <- lme(fixed = a ~ Motion.status*AgeMatchGroup*Country, random = ~ 1 | Participant.ID, data=df_spd_fits)
-ul <- unlist(anova(lme.a.country))
-```
 </div>
 
-## $theta$ parameter
+```{r lme-alpha, include=FALSE}
+# Linear mixed effects model
+lme.alpha <- lme(fixed = a ~ Motion.status*AgeMatchGroup*Country, random = ~ 1 | Participant.ID, data = df_spd_fits)
+anova(lme.alpha)
+```
+
+## Fitted $\theta$ Parameters {.flexbox .vcenter}
 
 <div class="centered">
 
 ```{r theta-plot, include=TRUE}
+# Plot theta parameter
 p.theta <- df_spd_fits %>%
   gather(Parameter.name, Fitted.value, a, k, theta ) %>%
   filter(Parameter.name=='theta') %>%
-  ggplot(aes(x=AgeMatchGroup, y=Fitted.value, color=Motion.status)) +
+  ggplot(aes(x=Motion.status, y=Fitted.value, color=Motion.status)) +
   facet_grid(. ~ Country) +
+  geom_boxplot() +
   geom_point() +
-  geom_smooth(method=lm) +
-  xlab("Age Group (mos)") +
+  xlab("") + 
   ylab("Parameter Estimate") +
   theme(strip.text = element_text(size=20), 
         axis.title = element_text(size=20),
@@ -569,11 +570,20 @@ p.theta <- df_spd_fits %>%
 p.theta
 ```
 
-```{r theta-stats}
-lme.theta.country <- lme(fixed = theta ~ Motion.status*AgeMatchGroup*Country, random = ~ 1 | Participant.ID, data=df_spd_fits)
-ul <- unlist(anova(lme.theta.country))
-```
 </div>
+
+```{r lme-theta, include=FALSE}
+# Linear mixed effects model
+lme.theta <- lme(fixed = theta ~ Motion.status*AgeMatchGroup*Country, random = ~ 1 | Participant.ID, data = df_spd_fits)
+anova(lme.theta)
+```
+
+## Summary: Empirical Flow Speed Effects
+
+- Fast speeds (> 100 deg/s) common
+- Moving ≠ Stationary
+- Broad distribution: $\kappa$, $\alpha$(moving) > $\kappa$, $\alpha$(stationary)
+- U.S. ~ India
 
 ## Empirical Pattern Distributions
 - Correlation with 'canonical' flow patterns
