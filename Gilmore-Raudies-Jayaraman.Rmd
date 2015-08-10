@@ -11,8 +11,8 @@ output:
     transition: default
 ---
 ```{r configuration, echo=FALSE, error=FALSE, include=FALSE, warning=FALSE, message=FALSE}
-# Source libraries
 
+# Source libraries
 library(ggplot2)
 library(dplyr)
 library(nlme)
@@ -29,6 +29,8 @@ fn_sim_spd_hist <- 'simulation-speed-hist.csv'
 fn_seg_duration <- 'coded-segments.csv'
 fn_spd_hist_bins <- 'speed-histogram-bins.csv'
 fn_spd_hist_fits <- 'speed-histogram-fits.csv'
+fn_patt <- 'pattern-histogram-bins.csv'
+
 ```
 
 ## What Accounts for Developmental Shifts in Optic Flow Sensitivity?
@@ -122,7 +124,8 @@ f^2+y^2 & -xy & -fy
 | Head tilt | 20 deg          | 9 deg          |
 
 <div class="centered">
-<img src="http://onlinelibrary.wiley.com/store/10.1111/cdev.12206/asset/image_n/cdev12206-fig-0002.png?v=1&t=icq821kh&s=fa7ae1fa8017b7ab988accc93127bb624d167587"/>
+</br>
+<img src="Gilmore-Raudies-Jayaraman_files/figs/kretch-etal.png" width=600px/>
 
 Kretch, Franchak, & Adolph (2014), <http://dx.doi.org/10.1111/cdev.12206>
 </div>
@@ -597,11 +600,38 @@ anova(lme.theta)
 <img src='Gilmore-Raudies-Jayaraman_files/figs/pattern-correlations.jpg' width=800px/>
 </div>
 
+## Pattern Correlation Results by Country {.flexbox .vcenter}
+
+```{r pattern-histogram, include = FALSE}
+df_patt <- read.csv(paste(dir.data, fn_patt, sep="/"))
+```
+
+<div class="centered">
+```{r plot-hist, include = TRUE}
+hist_patt_theme <- theme(strip.text = element_text(size=18),
+                         axis.title = element_text(size=18),
+                         axis.text = element_text(size=18),
+                         legend.position = "bottom",
+                         legend.title = element_blank(),
+                         legend.text = element_text(size = 18)
+                         )
+
+p_patt_hist <- df_patt %>%
+  arrange(Motion.status) %>%
+  ggplot(aes(x=Corr.Bin.Ctr, y=Corr.Bin.Count, fill=Motion.status)) +
+  geom_bar(stat="identity") +
+  facet_grid(Pattern ~ Country) +
+  xlab("Correlation") +
+  ylab("N obs") +  hist_patt_theme
+p_patt_hist
+```
+</div>
+
 ## Conclusions: Simulation
 
 - Posture influences optic flow speeds & patterns
     - Crawling: faster speeds, more translational flow
-    - Proximity to ground and pitch of head matter
+    - Proximity to ground and pitch of head
     - Geometry matters relatively little
     
 ## Conclusions: Empirical Data
