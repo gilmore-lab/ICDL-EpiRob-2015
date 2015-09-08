@@ -4,7 +4,7 @@ author: "Rick O. Gilmore"
 date: "`r Sys.Date()`"
 output:
   ioslides_presentation:
-    self_contained: false
+    self_contained: true
     lib_dir: libs
     widescreen: true
     incremental: false
@@ -62,7 +62,7 @@ fn_patt <- 'pattern-histogram-bins.csv'
 - Radial, rotational, translational/laminar patterns
 
 <div class="centered">
-  <img src="Gilmore-Raudies-Jayaraman_files/figs/optic-flow-types.png"/ width="900px">
+  <img src="Gilmore-Raudies-Jayaraman_files/figs/optic-flow-types.png"/ width="800px">
 </div>
 
 ## How Does Optic Flow Sensitivity Develop?
@@ -656,13 +656,13 @@ Moving Laminar ≠ Stationary Laminar in 13/22 infants.
 
 ## Children's responses to time-varying flow {.flexbox .vcenter}
 
-<img src="https://raw.githubusercontent.com/gilmore-lab/gilmore-thomas-fesi-2015/master/figs/1F1/child/channel-wise-effects-1.png" width=800px//>
+<img src="https://raw.githubusercontent.com/gilmore-lab/gilmore-thomas-fesi-2015/master/figs/1F1/child/channel-wise-effects-1.png" width=800px/>
 
 <http://gilmore-lab/gilmore-thomas-fesi-2015>
 
 ## Adults' reponses to time-varying flow {.flexbox .vcenter}
 
-<img src="https://raw.githubusercontent.com/gilmore-lab/gilmore-thomas-fesi-2015/master/figs/1F1/adult/channel-wise-effects-1.png" width=800px//>
+<img src="https://raw.githubusercontent.com/gilmore-lab/gilmore-thomas-fesi-2015/master/figs/1F1/adult/channel-wise-effects-1.png" width=800px/>
 
 <http://gilmore-lab/gilmore-thomas-fesi-2015>
 
