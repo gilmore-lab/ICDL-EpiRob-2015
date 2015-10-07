@@ -62,7 +62,7 @@ fn_patt <- 'pattern-histogram-bins.csv'
 - Radial, rotational, translational/laminar patterns
 
 <div class="centered">
-  <img src="Gilmore-Raudies-Jayaraman_files/figs/optic-flow-types.png"/ width="800px">
+  <img src="figs/optic-flow-types.png"/ width="800px">
 </div>
 
 ## How Does Optic Flow Sensitivity Develop?
@@ -125,7 +125,7 @@ f^2+y^2 & -xy & -fy
 
 <div class="centered">
 </br>
-<img src="Gilmore-Raudies-Jayaraman_files/figs/kretch-etal.png" width=600px/>
+<img src="figs/kretch-etal.png" width=600px/>
 
 Kretch, Franchak, & Adolph (2014), <http://dx.doi.org/10.1111/cdev.12206>
 </div>
@@ -143,13 +143,13 @@ Kretch, Franchak, & Adolph (2014), <http://dx.doi.org/10.1111/cdev.12206>
 ## Simulating Flow Fields {.flexbox .vcenter}
 
 <div class="centered">
-  <img src='Gilmore-Raudies-Jayaraman_files/figs/simulation-flow-patterns.png' width=800px/>
+  <img src='figs/simulation-flow-patterns.png' width=800px/>
 </div>
 
 ## Flow Direction Distributions by Geometry & Posture
 
 <div class="centered">
-  <img src='Gilmore-Raudies-Jayaraman_files/figs/simulation-flow-direction-hist.png' width=600px/>
+  <img src='figs/simulation-flow-direction-hist.png' width=600px/>
 </div>
 
 ## Flow Speeds By Geometry and Posture {.flexbox .vcenter}
@@ -446,22 +446,22 @@ $\alpha$, amplitude; $\kappa$, shape; and $\theta$, scale parameters.
 ## Illustrative Speed Histograms - 6 weeks {.flexbox .vcenter}
 
 <div class="columns-2" class="centered">
-<img src='Gilmore-Raudies-Jayaraman_files/figs/006AP.png' width=400px/>
-<img src='Gilmore-Raudies-Jayaraman_files/figs/006MO.png' width=400px/>
+<img src='figs/006AP.png' width=400px/>
+<img src='figs/006MO.png' width=400px/>
 </div>
 
 ## Illustrative Speed Histograms -- 34 weeks {.flexbox .vcenter}
 
 <div class="columns-2" class="centered">
-<img src='Gilmore-Raudies-Jayaraman_files/figs/034JC.png' width=400px/>
-<img src='Gilmore-Raudies-Jayaraman_files/figs/034NW.png' width=400px/>
+<img src='figs/034JC.png' width=400px/>
+<img src='figs/034NW.png' width=400px/>
 </div>
 
 ## Illustrative Speed Histograms -- 58 weeks {.flexbox .vcenter}
 
 <div class="columns-2" class="centered">
-<img src='Gilmore-Raudies-Jayaraman_files/figs/057AP.png' width=400px/>
-<img src='Gilmore-Raudies-Jayaraman_files/figs/058LA.png' width=400px/>
+<img src='figs/057AP.png' width=400px/>
+<img src='figs/058LA.png' width=400px/>
 </div>
 
 ## Fitted $\kappa$ Parameters {.flexbox .vcenter}
@@ -597,7 +597,7 @@ anova(lme.theta)
 ## Pattern Correlation Results
 
 <div class="centered">
-<img src='Gilmore-Raudies-Jayaraman_files/figs/pattern-correlations.jpg' width=800px/>
+<img src='figs/pattern-correlations.jpg' width=800px/>
 </div>
 
 ## Pattern Correlation Results by Country {.flexbox .vcenter}
